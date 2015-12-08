@@ -15,7 +15,7 @@ var (
 )
 
 // Client is an OVH Object Storage client.
-// All fileds are required for a successful connection.
+// All fields are required for a successful connection.
 type Client struct {
 	Region       string // Region must be "BHS1", "GRA1" or "SBG1" (according to the container region).
 	Container    string // Container is the name of the targetted container.
@@ -58,7 +58,7 @@ func (c *Client) Ping() error {
 	return nil
 }
 
-// List returs the a slice of all objects in the container.
+// List returns a slice of all objects in the container.
 //
 // CURL equivalent:
 // 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"

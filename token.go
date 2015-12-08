@@ -21,12 +21,12 @@ type token struct {
 }
 
 // token returns a working token.
-// A new one is requested when the current is expired.
+// A new one is requested when the current is (almost) expired.
 //
 // CURL equivalent:
 // 	curl https://auth.cloud.ovh.net/v2.0/tokens -X POST -H "content-type: application/json" -d '{"auth": {"passwordCredentials": {"username": "$USERNAME", "password": "$PASSWORD"}, "tenantId": "$TENANTID"}}'
 func (c *Client) token() (string, error) {
-	// Take the current token if not ready to expire.
+	// Take the current token when still valid for 5 minutes or more.
 	if c.currentToken.ID != "" && c.currentToken.Expiry.Before(time.Now().Truncate(5*time.Minute)) {
 		return c.currentToken.ID, nil
 	}
