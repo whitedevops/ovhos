@@ -46,16 +46,22 @@ func (c *Client) URL(object string) string {
 	return "https://" + path.Join("storage."+strings.ToLower(c.Region)+".cloud.ovh.net/v1/AUTH_"+c.TenantID+"/"+c.Container, object)
 }
 
-// Ping checks if the connection is OK for the client credentials.
-func (c *Client) Ping() error {
-	r, err := c.request("GET", "", nil)
-	if err != nil {
-		return err
-	}
+// get returns the response of a GET request.
+//
+// CURL equivalent:
+// 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"
+func (c *Client) get() (r *http.Response, err error) {
+	r, err = c.request("GET", "", nil)
 	if r.StatusCode != http.StatusOK && r.StatusCode != http.StatusNoContent {
-		return ErrRequest
+		err = ErrRequest
 	}
-	return nil
+	return
+}
+
+// Ping checks if the connection is OK for the client credentials.
+func (c *Client) Ping() (err error) {
+	_, err = c.get()
+	return
 }
 
 // List returns a slice of all objects in the container.
@@ -63,12 +69,9 @@ func (c *Client) Ping() error {
 // CURL equivalent:
 // 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"
 func (c *Client) List() ([]string, error) {
-	r, err := c.request("GET", "", nil)
+	r, err := c.get()
 	if err != nil {
 		return nil, err
-	}
-	if r.StatusCode != http.StatusOK && r.StatusCode != http.StatusNoContent {
-		return nil, ErrRequest
 	}
 
 	var l []string
@@ -78,6 +81,23 @@ func (c *Client) List() ([]string, error) {
 	}
 
 	return l, s.Err()
+}
+
+// Exists checks if the object exists in the container.
+func (c *Client) Exists(object string) (bool, error) {
+	r, err := c.get()
+	if err != nil {
+		return false, err
+	}
+
+	s := bufio.NewScanner(r.Body)
+	for s.Scan() {
+		if s.Text() == object {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 // Upload puts a new object in the container.
