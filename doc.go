@@ -55,6 +55,13 @@ Example:
 		}
 		fmt.Println(l)
 
+		// Check an object exists
+		e, err := storage.Exists("file.txt")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("file.txt exists: %t\n", e)
+
 		// Delete an object
 		if err := storage.Delete("file.txt"); err != nil {
 			panic(err)
