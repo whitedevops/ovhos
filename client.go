@@ -102,7 +102,7 @@ func (c *Client) Exists(object string) (bool, error) {
 // Upload puts a new object in the container.
 //
 // CURL equivalent:
-// 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER/$OBJECT -X PUT -H "X-Auth-Token: $TOKEN" --d @$FILE
+// 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER/$OBJECT -X PUT -H "X-Auth-Token: $TOKEN" -d @$FILE
 func (c *Client) Upload(object string, body io.Reader) error {
 	r, err := c.request("PUT", object, body)
 	if err != nil {
