@@ -85,19 +85,15 @@ func (c *Client) List() ([]string, error) {
 
 // Exists checks if the object exists in the container.
 func (c *Client) Exists(object string) (bool, error) {
-	r, err := c.get()
+	r, err := c.request("HEAD", object, nil)
 	if err != nil {
 		return false, err
 	}
-
-	s := bufio.NewScanner(r.Body)
-	for s.Scan() {
-		if s.Text() == object {
-			return true, nil
-		}
+	if r.StatusCode != http.StatusOK && r.StatusCode != http.StatusNotFound {
+		return false, ErrRequest
 	}
 
-	return false, nil
+	return r.StatusCode == http.StatusOK, nil
 }
 
 // Upload puts a new object in the container.
