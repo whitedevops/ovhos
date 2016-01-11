@@ -52,7 +52,7 @@ func (c *Client) URL(object string) string {
 // 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"
 func (c *Client) get() (r *http.Response, err error) {
 	r, err = c.request("GET", "", nil)
-	if r.StatusCode != http.StatusOK && r.StatusCode != http.StatusNoContent {
+	if err == nil && r.StatusCode != http.StatusOK && r.StatusCode != http.StatusNoContent {
 		err = ErrRequest
 	}
 	return
