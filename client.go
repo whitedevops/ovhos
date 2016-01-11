@@ -26,10 +26,14 @@ type Client struct {
 }
 
 // request makes a new client request to the OVH Object Storage.
-func (c *Client) request(method, object string, body io.Reader) (*http.Response, error) {
+func (c *Client) request(method, object string, header http.Header, body io.Reader) (*http.Response, error) {
 	r, err := http.NewRequest(method, c.URL(object), body)
 	if err != nil {
 		return nil, err
+	}
+
+	if header != nil {
+		r.Header = header
 	}
 
 	t, err := c.token()
@@ -51,7 +55,7 @@ func (c *Client) URL(object string) string {
 // CURL equivalent:
 // 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"
 func (c *Client) get() (r *http.Response, err error) {
-	r, err = c.request("GET", "", nil)
+	r, err = c.request("GET", "", nil, nil)
 	if err == nil && r.StatusCode != http.StatusOK && r.StatusCode != http.StatusNoContent {
 		err = ErrRequest
 	}
@@ -88,7 +92,7 @@ func (c *Client) List() ([]string, error) {
 // CURL equivalent:
 // 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X HEAD -H "X-Auth-Token: $TOKEN"
 func (c *Client) Exists(object string) (bool, error) {
-	r, err := c.request("HEAD", object, nil)
+	r, err := c.request("HEAD", object, nil, nil)
 	if err != nil {
 		return false, err
 	}
@@ -103,8 +107,11 @@ func (c *Client) Exists(object string) (bool, error) {
 //
 // CURL equivalent:
 // 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER/$OBJECT -X PUT -H "X-Auth-Token: $TOKEN" -d @$FILE
-func (c *Client) Upload(object string, body io.Reader) error {
-	r, err := c.request("PUT", object, body)
+func (c *Client) Upload(object, contentType string, body io.Reader) error {
+	h := make(http.Header)
+	h.Set("Content-Type", contentType)
+
+	r, err := c.request("PUT", object, h, body)
 	if err != nil {
 		return err
 	}
@@ -115,11 +122,11 @@ func (c *Client) Upload(object string, body io.Reader) error {
 }
 
 // UploadIfNew puts a new object in the container if it doesn't already exists.
-func (c *Client) UploadIfNew(object string, body io.Reader) error {
+func (c *Client) UploadIfNew(object, contentType string, body io.Reader) error {
 	if exists, err := c.Exists(object); exists || err != nil {
 		return err
 	}
-	return c.Upload(object, body)
+	return c.Upload(object, contentType, body)
 }
 
 // Delete removes an object from the container.
@@ -127,7 +134,7 @@ func (c *Client) UploadIfNew(object string, body io.Reader) error {
 // CURL equivalent:
 // 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER/$OBJECT -X DELETE -H "X-Auth-Token: $TOKEN"
 func (c *Client) Delete(object string) error {
-	r, err := c.request("DELETE", object, nil)
+	r, err := c.request("DELETE", object, nil, nil)
 	if err != nil {
 		return err
 	}
