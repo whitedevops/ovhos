@@ -114,6 +114,14 @@ func (c *Client) Upload(object string, body io.Reader) error {
 	return nil
 }
 
+// UploadIfNew puts a new object in the container if it doesn't already exists.
+func (c *Client) UploadIfNew(object string, body io.Reader) error {
+	if exists, err := c.Exists(object); exists || err != nil {
+		return err
+	}
+	return c.Upload(object, body)
+}
+
 // Delete removes an object from the container.
 //
 // CURL equivalent:
