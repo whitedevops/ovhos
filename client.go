@@ -62,7 +62,7 @@ func (c *Client) get() (r *http.Response, err error) {
 	return
 }
 
-// Ping checks if the connection is OK for the client credentials.
+// Ping verifies a connection can be done for the client credentials.
 func (c *Client) Ping() (err error) {
 	_, err = c.get()
 	return
