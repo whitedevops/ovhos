@@ -42,7 +42,7 @@ func (c *Client) request(method, object string, header http.Header, body io.Read
 	}
 	r.Header.Set("X-Auth-Token", t)
 
-	return (&http.Client{}).Do(r)
+	return http.DefaultClient.Do(r)
 }
 
 // URL returns the full object address.
