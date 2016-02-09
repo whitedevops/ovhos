@@ -24,10 +24,8 @@ import (
 	"strings"
 )
 
-// Errors
-var (
-	ErrRequest = errors.New("ovhos: request failed")
-)
+// ErrRequest is used when a request fails.
+var ErrRequest = errors.New("ovhos: request failed")
 
 // Client is an OVH Object Storage client.
 // All fields are required for a successful connection.

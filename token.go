@@ -9,10 +9,8 @@ import (
 	"time"
 )
 
-// Errors
-var (
-	ErrToken = errors.New("ovhos: new token request failed")
-)
+// ErrToken is used when a new token request fails.
+var ErrToken = errors.New("ovhos: new token request failed")
 
 // token is an OVH request token.
 type token struct {
