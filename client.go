@@ -1,3 +1,18 @@
+/*
+Package ovhos is a light SDK for the OVH Object Storage service.
+
+New client
+
+To access OVH Object Storage, you need to make a new client with your credentials:
+
+	var storage = &ovhos.Client{
+		Region:    "XXXX",
+		Container: "X",
+		TenantID:  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+		Username:  "XXXXXXXXXXXX",
+		Password:  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	}
+*/
 package ovhos
 
 import (
@@ -45,7 +60,7 @@ func (c *Client) request(method, object string, header http.Header, body io.Read
 	return http.DefaultClient.Do(r)
 }
 
-// URL returns the full object address.
+// URL returns the full address for object.
 func (c *Client) URL(object string) string {
 	return "https://" + path.Join("storage."+strings.ToLower(c.Region)+".cloud.ovh.net/v1/AUTH_"+c.TenantID+"/"+c.Container, object)
 }
@@ -53,7 +68,7 @@ func (c *Client) URL(object string) string {
 // get returns the response of a GET request.
 //
 // CURL equivalent:
-// 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"
+//	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"
 func (c *Client) get() (r *http.Response, err error) {
 	r, err = c.request("GET", "", nil, nil)
 	if err == nil && r.StatusCode != http.StatusOK && r.StatusCode != http.StatusNoContent {
@@ -71,7 +86,7 @@ func (c *Client) Ping() (err error) {
 // List returns a slice of all objects in the container.
 //
 // CURL equivalent:
-// 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"
+//	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X GET -H "X-Auth-Token: $TOKEN"
 func (c *Client) List() ([]string, error) {
 	r, err := c.get()
 	if err != nil {
@@ -90,7 +105,7 @@ func (c *Client) List() ([]string, error) {
 // Exists checks if the object exists in the container.
 //
 // CURL equivalent:
-// 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X HEAD -H "X-Auth-Token: $TOKEN"
+//	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER -X HEAD -H "X-Auth-Token: $TOKEN"
 func (c *Client) Exists(object string) (bool, error) {
 	r, err := c.request("HEAD", object, nil, nil)
 	if err != nil {
@@ -106,7 +121,7 @@ func (c *Client) Exists(object string) (bool, error) {
 // Upload puts a new object in the container.
 //
 // CURL equivalent:
-// 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER/$OBJECT -X PUT -H "X-Auth-Token: $TOKEN" -d @$FILE
+//	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER/$OBJECT -X PUT -H "X-Auth-Token: $TOKEN" -d @$FILE
 func (c *Client) Upload(object, contentType string, body io.Reader) error {
 	h := make(http.Header)
 	h.Set("Content-Type", contentType)
@@ -132,7 +147,7 @@ func (c *Client) UploadIfNew(object, contentType string, body io.Reader) error {
 // Delete removes an object from the container.
 //
 // CURL equivalent:
-// 	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER/$OBJECT -X DELETE -H "X-Auth-Token: $TOKEN"
+//	curl https://storage.$REGION.cloud.ovh.net/v1/AUTH_$TENANTID/$CONTAINER/$OBJECT -X DELETE -H "X-Auth-Token: $TOKEN"
 func (c *Client) Delete(object string) error {
 	r, err := c.request("DELETE", object, nil, nil)
 	if err != nil {
